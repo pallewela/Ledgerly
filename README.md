@@ -20,14 +20,14 @@ Built in defined stages (PLAN.md §5–§7). Stage exits are gates, not dates.
 | 1 — Contracts         | Domain types, currency core (ISO 4217, minor units), repository + engine interfaces, memory repository (Gate G1 freeze)                                                                                                           | ✅ done    |
 | 2 — Core build-out    | Engine (accounts, transactions, splits, transfers, net worth, rules, payee memory, budgets, bills), IndexedDB storage + snapshot export/restore, CSV import pipeline (locale-aware numbers, date detection, dedupe, review, undo) | ✅ done    |
 | 3 — UI foundation     | Dashboard, transactions, accounts, quick entry, import wizard + review, budgets, bills, settings                                                                                                                                  | ✅ done    |
-| 4 — Hardening         | PWA offline, share intake, push alerts, accessibility pass                                                                                                                                                                        | ⬜ next    |
-| 5 — Statement imports | PDF text-layer parsing, OCR screenshots, receipts, parser templates                                                                                                                                                               | ⬜ planned |
+| 4 — Hardening         | Installable PWA, offline shell + offline UX, focus/a11y pass                                                                                                                                                                      | ✅ done    |
+| 5 — Statement imports | PDF text-layer parsing, OCR screenshots, receipts, parser templates, share-sheet intake                                                                                                                                           | ⬜ planned |
 | 6 — Private beta      | Dogfood polish, golden-file corpus growth, diagnostics                                                                                                                                                                            | ⬜ planned |
 | 7 — Public beta       | Landing, terms, name clearance, launch                                                                                                                                                                                            | ⬜ planned |
 
-**Implementation status (2026-10-19):** Stages 0–3 are implemented and green — 58 unit tests (`npm test`), typecheck, lint, and the production build all pass locally; CI runs them on every push. Stage 4 (PWA hardening) is next.
+**Implementation status (2026-10-19):** Stages 0–4 are implemented and green — 58 unit tests (`npm test`), typecheck, lint, and the production build (including the service worker and manifest) all pass; CI runs them on every push. The app installs as a PWA, works offline after first load, and has the keyboard/screen-reader basics in place.
 
-**Known P0 gaps before private beta:** parser templates + suggested categories in the import review (FR-3.7/3.8), rules / categories / transfer management screens, and the PWA, offline and accessibility pass.
+**Known gaps before private beta:** parser templates + suggested categories in the import review (FR-3.7/3.8), rules / categories / transfer management screens, share-sheet intake (lands with Stage 5 file imports), and push notifications (deferred to V1.1 — web push needs a relay service, and the core loop is local-first).
 
 ## Quick start
 

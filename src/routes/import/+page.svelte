@@ -168,10 +168,18 @@
 	<p class="text-sm text-ink-soft">Loading…</p>
 {:else}
 	{#if error}
-		<p class="mb-4 rounded-lg bg-negative-soft px-3 py-2 text-sm text-negative">{error}</p>
+		<p class="mb-4 rounded-lg bg-negative-soft px-3 py-2 text-sm text-negative" role="alert">
+			{error}
+		</p>
 	{/if}
 	{#if message}
-		<p class="mb-4 rounded-lg bg-accent-soft px-3 py-2 text-sm text-accent">{message}</p>
+		<p
+			class="mb-4 rounded-lg bg-accent-soft px-3 py-2 text-sm text-accent"
+			role="status"
+			aria-live="polite"
+		>
+			{message}
+		</p>
 	{/if}
 
 	<Card title="1 · Choose the account and file">
