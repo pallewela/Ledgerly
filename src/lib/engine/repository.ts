@@ -78,6 +78,7 @@ export interface LedgerRepository {
 	getSetting<T>(key: string): Promise<T | undefined>;
 	putSetting(key: string, value: unknown): Promise<void>;
 	deleteSetting(key: string): Promise<void>;
+	listSettings(): Promise<Array<{ key: string; value: unknown }>>;
 
 	/** Hard-delete EVERYTHING (FR-8.6 delete-all, restore replace mode). */
 	clear(): Promise<void>;

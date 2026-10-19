@@ -25,6 +25,10 @@ Built in defined stages (PLAN.md §5–§7). Stage exits are gates, not dates.
 | 6 — Private beta      | Dogfood polish, golden-file corpus growth, diagnostics                                                                                                                                                                            | ⬜ planned |
 | 7 — Public beta       | Landing, terms, name clearance, launch                                                                                                                                                                                            | ⬜ planned |
 
+**Implementation status (2026-10-19):** Stages 0–3 are implemented and green — 58 unit tests (`npm test`), typecheck, lint, and the production build all pass locally; CI runs them on every push. Stage 4 (PWA hardening) is next.
+
+**Known P0 gaps before private beta:** parser templates + suggested categories in the import review (FR-3.7/3.8), rules / categories / transfer management screens, and the PWA, offline and accessibility pass.
+
 ## Quick start
 
 ```bash

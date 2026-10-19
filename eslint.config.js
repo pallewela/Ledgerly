@@ -1,6 +1,7 @@
 import prettier from 'eslint-config-prettier';
 import js from '@eslint/js';
 import svelte from 'eslint-plugin-svelte';
+import svelteParser from 'svelte-eslint-parser';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
@@ -20,6 +21,20 @@ export default tseslint.config(
 				'error',
 				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
 			],
+			// No base path is configured; plain hrefs are intentional.
+			'svelte/no-navigation-without-resolve': 'off',
+		},
+	},
+	{
+		// The shared TS config above applies to every file; Svelte files need
+		// their own parser with TypeScript inside <script lang="ts">.
+		files: ['**/*.svelte'],
+		languageOptions: {
+			parser: svelteParser,
+			parserOptions: {
+				parser: tseslint.parser,
+				extraFileExtensions: ['.svelte'],
+			},
 		},
 	},
 );

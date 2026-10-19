@@ -202,7 +202,14 @@ export interface EngineApi {
 	monthSummary(month: string, base: CurrencyCode, fx: FxRateTable): Promise<MonthSummary>;
 
 	// ---- Import support
-	recordImportBatch(batch: Omit<ImportBatch, 'id' | 'createdAt'>): Promise<ImportBatch>;
+	/**
+	 * Upsert semantics: passing an existing id updates label/counts. The import
+	 * pipeline records the batch first (so its transactions can reference the
+	 * id), then again with final counts.
+	 */
+	recordImportBatch(
+		batch: Omit<ImportBatch, 'createdAt'> & { createdAt?: string },
+	): Promise<ImportBatch>;
 	undoImportBatch(batchId: string): Promise<number>; // deletes its txs, returns count
 	listImportBatches(): Promise<ImportBatch[]>;
 }

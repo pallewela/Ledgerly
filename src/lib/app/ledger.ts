@@ -23,8 +23,12 @@ export async function initLedger(): Promise<void> {
 	if (started) return;
 	started = true;
 	const repo = await openRepository();
-	const { createEngine } = await import('$lib/engine');
-	engineStore.set(createEngine(repo));
+	const { createEngine, seedDefaultCategories } = await import('$lib/engine');
+	const instance = createEngine(repo);
+	// First run: a two-level category tree so the dashboard is usable at once.
+	const categories = await instance.listCategories({ includeArchived: true });
+	if (categories.length === 0) await seedDefaultCategories(instance);
+	engineStore.set(instance);
 	repoStore.set(repo);
 	readyStore.set(true);
 }
@@ -43,4 +47,11 @@ export function currentEngine(): EngineApi {
 	const e = get(engineStore);
 	if (!e) throw new Error('Ledger not initialised — await initLedger() first');
 	return e;
+}
+
+/** Throw-safe accessor for the underlying repository (snapshots, settings). */
+export function currentRepository(): LedgerRepository {
+	const r = get(repoStore);
+	if (!r) throw new Error('Ledger not initialised — await initLedger() first');
+	return r;
 }

@@ -16,6 +16,7 @@
 		"test:watch": "vitest"
 	},
 	"dependencies": {
+		"dexie": "^4.4.6",
 		"papaparse": "^5.4.1"
 	},
 	"devDependencies": {

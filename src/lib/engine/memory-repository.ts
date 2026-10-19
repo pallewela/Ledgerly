@@ -192,6 +192,9 @@ export class MemoryRepository implements LedgerRepository {
 	async putSetting(key: string, value: unknown): Promise<void> {
 		this.settings.set(key, value);
 	}
+	async listSettings(): Promise<Array<{ key: string; value: unknown }>> {
+		return [...this.settings.entries()].map(([key, value]) => ({ key, value }));
+	}
 	async deleteSetting(key: string): Promise<void> {
 		this.settings.delete(key);
 	}

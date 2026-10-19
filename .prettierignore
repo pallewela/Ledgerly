@@ -2,3 +2,5 @@ package-lock.json
 build/
 .svelte-kit/
 coverage/
+
+.zwork/

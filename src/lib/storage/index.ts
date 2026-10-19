@@ -1,11 +1,10 @@
-import type { LedgerRepository } from '$lib/engine/repository';
+export { IndexedDbRepository, createIndexedDbRepository } from './indexeddb-repository';
+export { exportSnapshot, restoreSnapshot } from './snapshot';
+export type { LedgerSnapshot } from './snapshot';
 
 /**
- * PLACEHOLDER — replaced by the Stage 2 storage build-out (PLAN W1).
- * The factory shape is part of the module contract: the app bootstrap
- * (src/lib/app/ledger.ts) calls createIndexedDbRepository() inside a
- * try/catch and falls back to MemoryRepository when storage is unavailable.
+ * Storage entry point. The factory shape is part of the module contract: the
+ * app bootstrap (src/lib/app/ledger.ts) calls createIndexedDbRepository()
+ * inside a try/catch and falls back to MemoryRepository when storage is
+ * unavailable (private mode, tests, or no IndexedDB at all).
  */
-export function createIndexedDbRepository(): LedgerRepository {
-	throw new Error('IndexedDbRepository: not implemented yet (Stage 2 storage build-out)');
-}
