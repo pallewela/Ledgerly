@@ -11,3 +11,7 @@ node_modules/
 vite.config.ts.timestamp-*
 
 .zwork/
+
+# Tesseract language data downloaded at runtime
+eng.traineddata
+*.traineddata

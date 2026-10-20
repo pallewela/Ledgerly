@@ -134,7 +134,7 @@ function parseLeadingDate(
 	}
 
 	// Numeric d/m/y or m/d/y.
-	match = /^(\d{1,2})[/.](\d{1,2})[/.](\d{2,4})(?!\d)/.exec(text);
+	match = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})(?!\d)/.exec(text);
 	if (match) {
 		const a = Number(match[1]);
 		const b = Number(match[2]);
@@ -195,6 +195,12 @@ function parseAmountToken(raw: string, currency: string): ParsedAmount | null {
 	}
 
 	const hasParens = /^\(.*\)$/.test(text);
+	// OCR sometimes drops the decimal point in grouped amounts:
+	// "1,634,24317" → "1,634,243.17".
+	if (!/[.,]\d{2}$/.test(text)) {
+		const repaired = text.replace(/^(\d{1,3}(?:[ ,]\d{3})+)(\d{2})$/, '$1.$2');
+		if (repaired !== text) text = repaired;
+	}
 	const hasCurrency =
 		/(rs\.?|lkr|usd|aud|eur|gbp|inr|jpy|cad|sgd|myr|aed|thb|\$|a\$|s\$|ca\$|₹|€|£|¥)/i.test(text);
 	const hasDecimal = /[.,]\d{1,2}\)?$/.test(text);
@@ -367,7 +373,7 @@ function inferDateOrder(lines: Line[], currency: string): 'DMY' | 'MDY' {
 	let dmy = 0;
 	let mdy = 0;
 	for (const line of lines) {
-		const match = /^(\d{1,2})[/.](\d{1,2})[/.](\d{2,4})\b/.exec(line.text);
+		const match = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})\b/.exec(line.text);
 		if (!match) continue;
 		const first = Number(match[1]);
 		const second = Number(match[2]);
@@ -412,11 +418,30 @@ export function extractTableFromText(
 		}
 		candidates += 1;
 
-		const payee = split.description.replace(/\s+/g, ' ').trim();
+		// A separate Type column ("Credit"/"Debit") carries the sign on many
+		// banking-app screenshots. Only the token immediately before the
+		// amount is treated as the type column, so descriptions like
+		// "credit card payment" are left intact.
+		const descriptionTokens = split.description.split(/\s+/).filter(Boolean);
+		let typeHint: 'credit' | 'debit' | null = null;
+		const trailing = descriptionTokens[descriptionTokens.length - 1]?.toLowerCase();
+		if (trailing === 'credit' || trailing === 'cr') {
+			typeHint = 'credit';
+			descriptionTokens.pop();
+		} else if (trailing === 'debit' || trailing === 'dr') {
+			typeHint = 'debit';
+			descriptionTokens.pop();
+		}
+
+		const payee = descriptionTokens.join(' ').replace(/\s+/g, ' ').trim();
 		let amount = split.amount.minor;
-		// Statements usually print debits unsigned. Default unsigned amounts to
-		// spending unless the text says otherwise or the payee looks like income.
-		if (amount > 0 && !split.amount.explicitPositive && !INCOME_HINTS.test(payee)) {
+		const magnitude = Math.abs(amount);
+		if (typeHint === 'credit') {
+			amount = magnitude;
+		} else if (typeHint === 'debit') {
+			amount = -magnitude;
+		} else if (amount > 0 && !split.amount.explicitPositive && !INCOME_HINTS.test(payee)) {
+			// Statements usually print debits unsigned.
 			amount = -amount;
 		}
 		raw.push({

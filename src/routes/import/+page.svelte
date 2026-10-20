@@ -453,7 +453,14 @@
 									/>
 								</td>
 								<td class="py-2">{row.date || '—'}</td>
-								<td class="py-2">{row.payee || '—'}</td>
+								<td class="py-2">
+									<input
+										class="w-full rounded border border-transparent bg-transparent px-1 py-0.5 hover:border-line focus:border-line focus:bg-paper"
+										bind:value={row.payee}
+										aria-label="Payee"
+										placeholder="Payee"
+									/>
+								</td>
 								<td class="py-2 text-right">
 									<Money minor={row.amountMinor} currency={account?.currency ?? 'LKR'} signed />
 								</td>

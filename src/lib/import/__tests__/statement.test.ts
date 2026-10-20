@@ -153,4 +153,30 @@ describe('statement table extraction', () => {
 		expect(merged.rows.map((r) => r.Description)).toEqual(['ONE', 'TWO']);
 		expect(merged.meta.candidates).toBe(2);
 	});
+
+	it('reads a banking-app layout with a Type column and DD-MM-YYYY dates', () => {
+		const table = extractTableFromText(
+			[
+				...row(670, '21-09-2026', 'Bonus Int', 'Credit 2,490.76', '1,634,243.17'),
+				...row(640, '20-09-2026', 'Interest Paid', 'Credit 2,490.76', '1,631,752.41'),
+				...row(610, '28-08-2026', 'Fee: SMS_Alerts', 'Debit 500.00', '1,629,261.65'),
+			],
+			{ currency: 'LKR', defaultYear: 2026 },
+		);
+
+		expect(table.rows.map((r) => `${r.Date}|${r.Description}|${r.Amount}`)).toEqual([
+			'2026-09-21|Bonus Int|2490.76',
+			'2026-09-20|Interest Paid|2490.76',
+			'2026-08-28|Fee: SMS_Alerts|-500.00',
+		]);
+	});
+
+	it('does not treat type words inside a payee as a sign column', () => {
+		const table = extractTableFromText(
+			[...row(670, '20/09/2026', 'Credit card payment', '500.00')],
+			{ currency: 'LKR', defaultYear: 2026 },
+		);
+		expect(table.rows[0].Description).toBe('Credit card payment');
+		expect(table.rows[0].Amount).toBe('-500.00');
+	});
 });
