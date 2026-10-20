@@ -239,6 +239,22 @@ function isCreditDebitMarker(value: string): boolean {
 	return /^(cr|dr)\.?$/i.test(value);
 }
 
+/**
+ * Strip leading OCR noise from banking-app icons (a lone letter, punctuation),
+ * while leaving real payees such as "A&W" or "St. Mary" untouched.
+ */
+function cleanPayee(payee: string): string {
+	const tokens = payee.split(/\s+/).filter(Boolean);
+	while (tokens.length > 1) {
+		const first = tokens[0];
+		const singleLetter = /^[A-Za-z]$/.test(first);
+		const noLettersOrDigits = !/[\p{L}\p{N}]/u.test(first);
+		if (!singleLetter && !noLettersOrDigits) break;
+		tokens.shift();
+	}
+	return tokens.join(' ');
+}
+
 function trimDescription(tokens: string[]): string {
 	let end = tokens.length;
 	while (end > 0 && isCurrencyMarker(tokens[end - 1])) end -= 1;
@@ -405,18 +421,10 @@ export function extractTableFromText(
 	let skipped = 0;
 	const raw: RawRow[] = [];
 
-	for (const line of lines) {
-		const dateMatch = parseLeadingDate(line.text, dateOrder, defaultYear);
-		if (!dateMatch) {
-			skipped += 1;
-			continue;
-		}
-		const split = splitTrailingAmounts(dateMatch.rest, opts.currency);
-		if (!split) {
-			skipped += 1;
-			continue;
-		}
-		candidates += 1;
+	/** Parse one candidate row from text that follows a date (or a section date). */
+	function parseRow(isoDate: string, text: string): RawRow | null {
+		const split = splitTrailingAmounts(text, opts.currency);
+		if (!split) return null;
 
 		// A separate Type column ("Credit"/"Debit") carries the sign on many
 		// banking-app screenshots. Only the token immediately before the
@@ -433,7 +441,9 @@ export function extractTableFromText(
 			descriptionTokens.pop();
 		}
 
-		const payee = descriptionTokens.join(' ').replace(/\s+/g, ' ').trim();
+		const payee = cleanPayee(descriptionTokens.join(' ').replace(/\s+/g, ' ').trim());
+		if (!payee) return null;
+
 		let amount = split.amount.minor;
 		const magnitude = Math.abs(amount);
 		if (typeHint === 'credit') {
@@ -444,12 +454,49 @@ export function extractTableFromText(
 			// Statements usually print debits unsigned.
 			amount = -amount;
 		}
-		raw.push({
-			isoDate: dateMatch.iso,
+		return {
+			isoDate,
 			payee,
 			amountMinor: amount,
 			balanceMinor: split.balance ? Math.abs(split.balance.minor) : null,
-		});
+		};
+	}
+
+	// Some banking apps print a date once as a section header, then list
+	// transaction cards beneath it (no per-row date). Track the active section
+	// date per page; a date line with no payee (e.g. a daily total) starts a
+	// new section instead of becoming a row.
+	let sectionDate: string | null = null;
+	let currentPage = Number.NaN;
+
+	for (const line of lines) {
+		if (line.page !== currentPage) {
+			currentPage = line.page;
+			sectionDate = null;
+		}
+
+		const dateMatch = parseLeadingDate(line.text, dateOrder, defaultYear);
+		if (dateMatch) {
+			const row = parseRow(dateMatch.iso, dateMatch.rest);
+			if (row) {
+				candidates += 1;
+				raw.push(row);
+			} else {
+				sectionDate = dateMatch.iso;
+				skipped += 1;
+			}
+			continue;
+		}
+
+		if (sectionDate) {
+			const row = parseRow(sectionDate, line.text);
+			if (row) {
+				candidates += 1;
+				raw.push(row);
+				continue;
+			}
+		}
+		skipped += 1;
 	}
 
 	// Newest-first statements would invert every balance delta; normalise to

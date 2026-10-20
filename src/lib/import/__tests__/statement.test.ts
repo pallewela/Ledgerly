@@ -179,4 +179,33 @@ describe('statement table extraction', () => {
 		expect(table.rows[0].Description).toBe('Credit card payment');
 		expect(table.rows[0].Amount).toBe('-500.00');
 	});
+
+	it('reads date-section layouts (header date, then transaction cards)', () => {
+		const table = extractTableFromText(
+			[
+				item('31 Aug 2026', 40, 700),
+				item('+A$0.01', 600, 700), // daily total on the date header
+				item('o Credit Interest Paid', 120, 670),
+				item('+A$0.01', 600, 670),
+				item('Interest', 120, 640),
+				item('30 Aug 2026', 40, 610),
+				item('To Everyday', 120, 580),
+				item('A$4.00', 600, 580),
+				item('27 Aug 2026', 40, 550),
+				item('To Everyday', 120, 520),
+				item('A$45.00', 600, 520),
+				item('25 Aug 2026', 40, 490),
+				item('a From Everyday', 120, 460),
+				item('+A$50.00', 600, 460),
+			],
+			{ currency: 'AUD', defaultYear: 2026 },
+		);
+
+		expect(table.rows.map((r) => `${r.Date}|${r.Description}|${r.Amount}`)).toEqual([
+			'2026-08-31|Credit Interest Paid|0.01',
+			'2026-08-30|To Everyday|-4.00',
+			'2026-08-27|To Everyday|-45.00',
+			'2026-08-25|From Everyday|50.00',
+		]);
+	});
 });
