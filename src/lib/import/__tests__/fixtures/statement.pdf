@@ -1,0 +1,37 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+5 0 obj
+<< /Length 303 >>
+stream
+BT /F1 10 Tf 40 750 Td 14 TL
+(Date        Description              Amount       Balance) Tj T*
+(18/10/2026  KEELLS SUPER             1,234.56     45,678.90) Tj T*
+(19/10/2026  SALARY OCTOBER          250,000.00 CR 295,678.90) Tj T*
+(20/10/2026  DIALOG                   6,000.00 DR  289,678.90) Tj T*
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000309 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+663
+%%EOF
